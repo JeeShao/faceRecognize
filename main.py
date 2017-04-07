@@ -9,7 +9,6 @@ from configure import config
 from PyQt4.QtGui import QApplication
 
 def main():
-
     model = cv2.face.createLBPHFaceRecognizer()
     model.load(config.TRAINING_FILE)
     
