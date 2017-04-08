@@ -28,7 +28,6 @@ class Recognizer(QThread):
             return
 
         if self.model is None:
-            print("model==None")
             # only return result when model is None
             return
         else:

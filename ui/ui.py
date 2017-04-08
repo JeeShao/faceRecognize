@@ -88,9 +88,12 @@ class FaceRegister(QWidget):
         # FaceRegister.center()
 
         self.inputDialog = InputDialog(self.reciveUserName)
+        self.inputDialog.resize(200,40)
+        self.inputDialog.center()
+        # self.inputDialog.setGeometry(QtCore.QRect(570, 280, 200, 40))#设置用户名输入窗口位置和大小
 
         font = QtGui.QFont()
-        font.setPointSize(16)
+        font.setPointSize(18)
         #顶部文字
         self.label_title = QtGui.QLabel(FaceRegister)
         self.label_title.setGeometry(QtCore.QRect(320, 20, 200, 60))
@@ -154,7 +157,7 @@ class FaceRegister(QWidget):
         self.recognizer = recognize.Recognizer()
         self.recognizer.finished.connect(self.reciveRecognizeResult)
         image = self.video.getGrayCVImage()
-        self.recognizer.startRec(image, None)
+        self.recognizer.startRec(image, self.model)
 
     def reciveRecognizeResult(self):
         self.faceRect = self.recognizer.result
@@ -201,7 +204,6 @@ class FaceRegister(QWidget):
 
     def pushButton_capture_clicked(self):
         self.inputDialog.setInfo('请输入用户名')
-        # self.inputDialog.center()
         self.inputDialog.show()
         self.inputDialog.clear()
 
@@ -348,20 +350,29 @@ class FaceRec(QWidget):
 
 
 #用户名输入控件
-class InputDialog(TouchInputWidget):
+class InputDialog(QWidget):
     def __init__(self, callback):
-        TouchInputWidget.__init__(self)
+        QWidget.__init__(self)
         
         self.callback = callback
-        
+
+        font = QtGui.QFont()
+        font.setPointSize(11)
+
         self.labelInfo = QtGui.QLabel()
+        self.labelInfo.setFont(font)
+
         self.msgInfo = QtGui.QLabel()
+        self.msgInfo.setFont(font)
+
 
         self.editUserName = QtGui.QLineEdit()
+        self.editUserName.setFont(font)
         # self.editUserName.keyboard_type = 'default'
         
         self.pushButton_accept = QtGui.QPushButton(self)
         self.pushButton_accept.setText('确认')
+        self.pushButton_accept.setFont(font)
         self.pushButton_accept.clicked.connect(self.reciveUserName)
 
 
@@ -370,7 +381,6 @@ class InputDialog(TouchInputWidget):
         gl.addWidget(self.labelInfo)
         gl.addWidget(self.editUserName)
         gl.addWidget(self.msgInfo)
-        # gl.setAlignment(QtCore.Qt.AlignCenter)
 
         
         self.setLayout(gl)
@@ -378,7 +388,7 @@ class InputDialog(TouchInputWidget):
     def center(self):
         screen = QtGui.QDesktopWidget().screenGeometry()
         size = self.geometry()
-        self.move((screen.width() - size.width()) / 2, (screen.height() - size.height()) / 2)
+        self.move((screen.width() - size.width()) // 2, (screen.height() - size.height()) // 2)
 
     def setInfo(self, info):
         self.labelInfo.setText(info)
@@ -390,7 +400,7 @@ class InputDialog(TouchInputWidget):
         self.editUserName.clear()
         
     def reciveUserName(self):
-        self.touch_interface._input_panel_all.hide()
+        # self.touch_interface._input_panel_all.hide()
         self.userName = self.editUserName.text()
         if self.userName == '':
             return
@@ -424,11 +434,11 @@ class PictureSelect(QWidget):
         
         font = QtGui.QFont()
         font.setPointSize(18)
-        
+
         self.label_info = QtGui.QLabel(pictureSelect)
         self.label_info.setGeometry(QtCore.QRect(160, 20, 480, 50))
         self.label_info.setFont(font)
-        
+
         self.scrollArea = QtGui.QScrollArea(pictureSelect)
         self.scrollArea.setGeometry(QtCore.QRect(135, 80, 530, 400)) #图片窗口
         self.scrollArea.setWidgetResizable(False)
@@ -495,6 +505,9 @@ class PictureSelect(QWidget):
     def trainFinish(self):
         dialog = QtGui.QMessageBox()
         dialog.setWindowTitle('info')
+        font = QtGui.QFont()
+        font.setPointSize(11)
+        dialog.setFont(font)
         dialog.setText('人脸录入已完成(%s)'%self.path)
         if dialog.exec_():
             self.label_info.setText('选择要删除的图片，点击删除按钮进行删除')

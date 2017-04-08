@@ -59,6 +59,7 @@ class Ui_MainWindow(QMainWindow):
         self.lcd_time.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor)) #set cursor style
         self.lcd_time.setDigitCount(8) #设置LCD显示位数
         self.lcd_time.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.lcd_time.setLineWidth(0) #无边框
         self.verticalLayout.addWidget(self.lcd_time)
 
         self.label_welcome = QtGui.QLabel(self.centralwidget)
