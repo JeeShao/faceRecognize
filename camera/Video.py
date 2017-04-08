@@ -76,5 +76,5 @@ class Video():
                 grayFrame = cv2.flip(grayFrame, 1)
             return grayFrame
         else:
-            print('readFrame is None')
+            # print('readFrame is None')
             return None

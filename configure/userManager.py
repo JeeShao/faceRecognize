@@ -118,7 +118,6 @@ class UserManager(object):
         self.csvIn.close()
 
     def __writeCSV(self, data):
-        print("data:",data)
         if type(data) is list:
             self.csvOut = open(self.__CSVFile, 'w', newline='')
             self.writer = csv.DictWriter(self.csvOut, self.fieldNames)
@@ -130,7 +129,7 @@ class UserManager(object):
         elif type(data) is dict:
             self.csvOut = open(self.__CSVFile, 'a',newline='')
             self.writer = csv.DictWriter(self.csvOut, self.fieldNames)
-            print('user append')
+            # print('user append')
             self.writer.writerow(data)
             self.csvOut.close()
         

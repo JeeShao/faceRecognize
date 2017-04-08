@@ -37,10 +37,10 @@ def trainFace(model):
     manager = userManager.UserManager()
     
     persons = os.listdir(config.FACES_DIR)
+    print(user)
     for person in persons:
         manager.addUser(person)
         user = manager.getUserByName(person)
-        print(user)
         label = int(user['id'])
         personDir = os.path.join(config.FACES_DIR, person)
         for fileName in walkFiles(personDir, '*.pgm'):

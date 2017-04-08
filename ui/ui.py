@@ -62,6 +62,164 @@ class VideoFrame(QtGui.QLabel):
         if self.userName is not None:
             painter.drawText(self.x, self.y+15, self.userName)
 
+# 人脸录入界面
+class FaceRegister(QWidget):
+    faceRect = None
+    captureFlag = 0
+    personName = None
+    recOver = False
+    model = None
+
+    def __init__(self, mainWindow):
+        super(FaceRegister, self).__init__()
+
+        self.mainWindow = mainWindow
+        self.manager = userManager.UserManager()
+
+        self.setupUi(self)
+
+        self._timer = QtCore.QTimer(self)
+        self._timer.timeout.connect(self.playVideo)
+        # self._timer.start(10)
+        self.update()
+
+    def setupUi(self, FaceRegister):
+        FaceRegister.setObjectName(_fromUtf8("FaceRegister"))
+        FaceRegister.resize(800, 640)
+        # FaceRegister.center()
+
+        self.inputDialog = InputDialog(self.reciveUserName)
+
+        font = QtGui.QFont()
+        font.setPointSize(16)
+
+        self.label_title = QtGui.QLabel(FaceRegister)
+        self.label_title.setGeometry(QtCore.QRect(320, 20, 200, 60))
+        self.label_title.setFont(font)
+
+        self.progressBar = QtGui.QProgressBar(FaceRegister)
+        self.progressBar.setGeometry(QtCore.QRect(150, 440, 520, 60))
+        self.progressBar.setRange(0, 20)
+        self.progressBar.setValue(0)
+        self.progressBar.setFont(font)
+        self.progressBar.setVisible(False)
+
+        self.video_frame = VideoFrame(FaceRegister)
+        self.video_frame.setGeometry(QtCore.QRect(150, 70, 500, 360))
+
+        self.pushButton_capture = QtGui.QPushButton(FaceRegister)
+        self.pushButton_capture.setGeometry(QtCore.QRect(200, 520, 100, 60))
+        self.pushButton_capture.setFont(font)
+        self.pushButton_capture.clicked.connect(self.pushButton_capture_clicked)
+
+        self.pushButton_back = QtGui.QPushButton(FaceRegister)
+        self.pushButton_back.setGeometry(QtCore.QRect(500, 520, 100, 60))
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        self.pushButton_back.setFont(font)
+        self.pushButton_back.clicked.connect(self.pushButton_back_clicked)
+
+        self.retranslateUi(FaceRegister)
+        QtCore.QMetaObject.connectSlotsByName(FaceRegister)
+
+    def center(self):
+        screen = QtGui.QDesktopWidget().screenGeometry()
+        size = self.geometry()
+        self.move((screen.width() - size.width()) / 2, (screen.height() - size.height()) / 2)
+
+    def setVideo(self, video):
+        self.video = video
+        if self.video.is_release:
+            self.video.open(0)
+
+    def setModel(self, model):
+        self.model = model
+
+    def playVideo(self):
+        try:
+            pixMap_frame = QtGui.QPixmap.fromImage(self.video.getQImageFrame())
+            x = 0;
+            y = 0;
+            w = 0;
+            h = 0
+            if self.faceRect is not None:
+                x, y, w, h = self.faceRect[0] * 0.75, self.faceRect[1] * 0.75, self.faceRect[2] * 0.75, \
+                             self.faceRect[3] * 0.75
+            self.video_frame.setRect(x, y, w, h)
+            self.video_frame.setPixmap(pixMap_frame)
+            self.video_frame.setScaledContents(True)
+        except TypeError:
+            print('No frame')
+
+    def startRec(self):
+        self.recognizer = recognize.Recognizer()
+        self.recognizer.finished.connect(self.reciveRecognizeResult)
+        image = self.video.getGrayCVImage()
+        self.recognizer.startRec(image, None)
+
+    def reciveRecognizeResult(self):
+        self.faceRect = self.recognizer.result
+        if self.faceRect is not None and self.captureFlag != 0:
+            x, y, w, h = self.faceRect
+            crop = face.crop(self.recognizer.faceImage, x, y, w, h)
+            personDir = os.path.join(config.FACES_DIR, self.personName)
+            if not os.path.exists(personDir):
+                os.makedirs(personDir)
+            fileName = os.path.join(personDir, 'face_' + '%03d.pgm' % self.captureFlag)
+            cv2.imwrite(fileName, crop)
+            self.captureFlag -= 1
+            self.progressBar.setValue(20 - self.captureFlag)
+            if self.captureFlag == 0:
+                self.recOver = True
+                print('capture over')
+                self.video.release()
+                self.startPictureSelect()
+
+        if not self.video.is_release and self.recOver == False:
+            self.startRec()
+
+    def reciveUserName(self, name):
+        self.personName = str(name)
+
+        # self.inputDialog.deleteLater()
+        personDir = os.path.join(config.FACES_DIR, self.personName)
+        if os.path.exists(personDir):
+            print('person already exist')
+            self.inputDialog.seterrMsg('用户已存在！')
+            # self.inputDialog.show()
+            # self.inputDialog.clear()
+        else:
+            self.pushButton_capture.setEnabled(False)
+            self.captureFlag = 20
+            self.progressBar.setVisible(True)
+            self.label_title.setText('录入人脸信息')
+            self._timer.start(10)
+            self.startRec()
+
+    def startPictureSelect(self):
+        print('start picture select')
+        pictureSelect = PictureSelect(self.mainWindow, self.personName)
+        pictureSelect.setModel(self.model)
+        self.mainWindow.setCentralWidget(pictureSelect)
+
+    def pushButton_capture_clicked(self):
+        self.inputDialog.setInfo('请输入用户名')
+        # self.inputDialog.center()
+        self.inputDialog.show()
+        self.inputDialog.clear()
+
+    def pushButton_back_clicked(self):
+        self._timer.stop()
+        self.video.release()
+        self.mainWindow.setupUi(self.mainWindow)
+
+    def retranslateUi(self, FaceRegister):
+        FaceRegister.setWindowTitle(_translate("FaceRegister", "Form", None))
+        self.label_title.setText(_translate("FaceRegister", " ", None))
+        self.video_frame.setText(_translate("FaceRegister", " ", None))
+        self.pushButton_capture.setText(_translate("FaceRegister", "开始", None))
+        self.pushButton_back.setText(_translate("FaceRegister", "返回", None))
+
 #人脸识别界面
 class FaceRec(QWidget):
     
@@ -191,164 +349,6 @@ class FaceRec(QWidget):
         self.label_info.setText(_translate("FaceRec", "label_info", None))
         self.pushButton_back.setText(_translate("FaceRec", "返回", None))
 
-#人脸录入界面
-class FaceRegister(QWidget):
-    
-    faceRect = None
-    
-    captureFlag = 0
-    personName = None
-    recOver = False
-    model = None
-    
-    def __init__(self, mainWindow):
-        super(FaceRegister, self).__init__()
-        
-        self.mainWindow = mainWindow
-        self.manager = userManager.UserManager()
-        
-        self.setupUi(self)
-        
-        self._timer = QtCore.QTimer(self)
-        self._timer.timeout.connect(self.playVideo)
-        # self._timer.start(10)
-        
-        self.update()
-        
-    def setupUi(self, FaceRegister):
-        FaceRegister.setObjectName(_fromUtf8("FaceRegister"))
-        FaceRegister.resize(800,640)
-        FaceRegister.center()
-        
-        self.inputDialog = InputDialog(self.reciveUserName)
-
-        font = QtGui.QFont()
-        font.setPointSize(16)
-
-        self.label_title = QtGui.QLabel(FaceRegister)
-        self.label_title.setGeometry(QtCore.QRect(320, 50, 200, 60))
-        self.label_title.setFont(font)
-
-        self.progressBar = QtGui.QProgressBar(FaceRegister)
-        self.progressBar.setGeometry(QtCore.QRect(150, 470, 500, 60))
-        self.progressBar.setRange(0, 20)
-        self.progressBar.setValue(0)
-        self.progressBar.setFont(font)
-        self.progressBar.setVisible(False)
-
-        self.video_frame = VideoFrame(FaceRegister)
-        self.video_frame.setGeometry(QtCore.QRect(150, 100, 500, 360))
-         
-        self.pushButton_capture = QtGui.QPushButton(FaceRegister)
-        self.pushButton_capture.setGeometry(QtCore.QRect(200, 500, 100, 60))
-        self.pushButton_capture.setFont(font)
-        self.pushButton_capture.clicked.connect(self.pushButton_capture_clicked)
-         
-        self.pushButton_back = QtGui.QPushButton(FaceRegister)
-        self.pushButton_back.setGeometry(QtCore.QRect(500, 500, 100, 60))
-        font = QtGui.QFont()
-        font.setPointSize(16)
-        self.pushButton_back.setFont(font)
-        self.pushButton_back.clicked.connect(self.pushButton_back_clicked)
- 
-        self.retranslateUi(FaceRegister)
-        QtCore.QMetaObject.connectSlotsByName(FaceRegister)
-
-    def center(self):
-        screen = QtGui.QDesktopWidget().screenGeometry()
-        size = self.geometry()
-        print(size.width()," ",size.height)
-        self.move((screen.width() - size.width()) / 2, (screen.height() - size.height()) / 2)
-
-    def setVideo(self, video):
-        self.video = video
-        if self.video.is_release:
-            self.video.open(0)
-        
-    def setModel(self, model):
-        self.model = model
-        
-    def playVideo(self):
-        try:
-            pixMap_frame = QtGui.QPixmap.fromImage(self.video.getQImageFrame())
-            x = 0;y = 0;w = 0;h = 0
-            if self.faceRect is not None:
-                x, y, w, h = self.faceRect[0]*0.75, self.faceRect[1]*0.75, self.faceRect[2]*0.75, self.faceRect[3]*0.75
-            self.video_frame.setRect(x, y, w, h)
-            self.video_frame.setPixmap(pixMap_frame)
-            self.video_frame.setScaledContents(True)
-        except TypeError:
-            print('No frame')
-        
-    def startRec(self):
-        self.recognizer = recognize.Recognizer()
-        self.recognizer.finished.connect(self.reciveRecognizeResult)
-        image = self.video.getGrayCVImage()
-        self.recognizer.startRec(image, None)
-        
-    def reciveRecognizeResult(self):
-        self.faceRect = self.recognizer.result
-        if self.faceRect is not None and self.captureFlag != 0:
-            x, y, w, h = self.faceRect
-            crop = face.crop(self.recognizer.faceImage, x, y, w, h)
-            personDir = os.path.join(config.FACES_DIR, self.personName)
-            if not os.path.exists(personDir):
-                os.makedirs(personDir)
-            fileName = os.path.join(personDir, 'face_'+'%03d.pgm'%self.captureFlag)
-            cv2.imwrite(fileName, crop)
-            self.captureFlag -= 1
-            self.progressBar.setValue(20 - self.captureFlag)
-            if self.captureFlag == 0:
-                self.recOver = True
-                print('capture over')
-                self.video.release()
-                self.startPictureSelect()
-   
-        if not self.video.is_release and self.recOver == False:
-            self.startRec()
-        
-    def reciveUserName(self, name):
-        self.personName = str(name)
-        
-        #self.inputDialog.deleteLater()
-        personDir = os.path.join(config.FACES_DIR, self.personName)
-        if os.path.exists(personDir):
-            print('person already exist')
-            self.inputDialog.seterrMsg('用户已存在！')
-            # self.inputDialog.show()
-            # self.inputDialog.clear()
-        else:
-            self.pushButton_capture.setEnabled(False)
-            self.captureFlag = 20
-            self.progressBar.setVisible(True)
-            self.label_title.setText('开始截取图片')
-            self._timer.start(10)
-            self.startRec()
-            
-    def startPictureSelect(self):
-        print('start picture select')
-        pictureSelect = PictureSelect(self.mainWindow, self.personName)
-        pictureSelect.setModel(self.model)
-        self.mainWindow.setCentralWidget(pictureSelect)
-        
-    def pushButton_capture_clicked(self):
-        self.inputDialog.setInfo('请输入用户名')
-        self.inputDialog.center()
-        self.inputDialog.show()
-        self.inputDialog.clear()
-
-            
-    def pushButton_back_clicked(self):
-        self._timer.stop()
-        self.video.release()
-        self.mainWindow.setupUi(self.mainWindow)
-
-    def retranslateUi(self, FaceRegister):
-        FaceRegister.setWindowTitle(_translate("FaceRegister", "Form", None))
-        self.label_title.setText(_translate("FaceRegister", " ", None))
-        self.video_frame.setText(_translate("FaceRegister", " ", None))
-        self.pushButton_capture.setText(_translate("FaceRegister", "开始", None))
-        self.pushButton_back.setText(_translate("FaceRegister", "返回", None))
 
 #用户名输入控件
 class InputDialog(TouchInputWidget):
@@ -373,6 +373,7 @@ class InputDialog(TouchInputWidget):
         gl.addWidget(self.labelInfo)
         gl.addWidget(self.editUserName)
         gl.addWidget(self.msgInfo)
+        # gl.setAlignment(QtCore.Qt.AlignCenter)
 
         
         self.setLayout(gl)
