@@ -88,6 +88,7 @@ class FaceRegister(QWidget):
         # FaceRegister.center()
 
         self.inputDialog = InputDialog(self.reciveUserName)
+        self.inputDialog.setWindowModality(Qt.ApplicationModal) #阻塞除当前窗体之外的所有的窗体
         self.inputDialog.resize(200,40)
         self.inputDialog.center()
         # self.inputDialog.setGeometry(QtCore.QRect(570, 280, 200, 40))#设置用户名输入窗口位置和大小
@@ -184,12 +185,13 @@ class FaceRegister(QWidget):
 
         # self.inputDialog.deleteLater()
         personDir = os.path.join(config.FACES_DIR, self.personName)
-        if os.path.exists(personDir):
-            print('person already exist')
-            self.inputDialog.seterrMsg('用户已存在！')
-            # self.inputDialog.show()
-            # self.inputDialog.clear()
+        if name=='':
+            self.inputDialog.seterrMsg('用户名不能为空!')
+        elif os.path.exists(personDir):
+            self.inputDialog.seterrMsg('用户已存在!')
+
         else:
+            self.inputDialog.close() #用户不存在则关闭该窗口
             self.pushButton_capture.setEnabled(False)
             self.captureFlag = 20 #获取20张人脸图片
             self.progressBar.setVisible(True) #显示进度条
@@ -204,8 +206,8 @@ class FaceRegister(QWidget):
 
     def pushButton_capture_clicked(self):
         self.inputDialog.setInfo('请输入用户名')
+        self.inputDialog.clear()#清空内容
         self.inputDialog.show()
-        self.inputDialog.clear()
 
     def pushButton_back_clicked(self):
         # self._timer.stop()
@@ -363,6 +365,9 @@ class InputDialog(QWidget):
         self.labelInfo.setFont(font)
 
         self.msgInfo = QtGui.QLabel()
+        pe = QPalette() #设置提示信息颜色
+        pe.setColor(QPalette.WindowText, Qt.red)
+        self.msgInfo.setPalette(pe)
         self.msgInfo.setFont(font)
 
 
@@ -377,9 +382,9 @@ class InputDialog(QWidget):
 
 
         gl = QtGui.QVBoxLayout()
-        gl.addWidget(self.pushButton_accept)
         gl.addWidget(self.labelInfo)
         gl.addWidget(self.editUserName)
+        gl.addWidget(self.pushButton_accept)
         gl.addWidget(self.msgInfo)
 
         
@@ -395,17 +400,18 @@ class InputDialog(QWidget):
 
     def seterrMsg(self,info):
         self.msgInfo.setText(info)
-        
+
     def clear(self):
         self.editUserName.clear()
+        self.msgInfo.clear()
         
     def reciveUserName(self):
         # self.touch_interface._input_panel_all.hide()
         self.userName = self.editUserName.text()
-        if self.userName == '':
-            return
+        # if self.userName == '':
+        #     return
         self.callback(self.userName)
-        self.hide()
+        # self.hide()
 
 #图片选择界面
 class PictureSelect(QWidget):
