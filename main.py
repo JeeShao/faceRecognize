@@ -1,4 +1,7 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+#  -- coding:utf-8 --
+# #@Time  : 2017/3/22
+# #@Author: Jee
 import sys
 import cv2
 

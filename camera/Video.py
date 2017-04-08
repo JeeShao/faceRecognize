@@ -1,4 +1,7 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+#  -- coding:utf-8 --
+# #@Time  : 2017/3/22
+# #@Author: Jee
 import cv2
 import numpy as np
 from PyQt4 import QtGui

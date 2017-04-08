@@ -1,4 +1,7 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+#  -- coding:utf-8 --
+# #@Time  : 2017/3/22
+# #@Author: Jee
 import os
 import cv2
 import fnmatch
@@ -37,7 +40,6 @@ def trainFace(model):
     manager = userManager.UserManager()
     
     persons = os.listdir(config.FACES_DIR)
-    print(user)
     for person in persons:
         manager.addUser(person)
         user = manager.getUserByName(person)

@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+#  -- coding:utf-8 --
+# #@Time  : 2017/3/22
+# #@Author: Jee
 from . import face
 from PyQt4.QtCore import QThread
 

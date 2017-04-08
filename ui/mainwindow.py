@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+#  -- coding:utf-8 --
+# #@Time  : 2017/3/22
+# #@Author: Jee
 import datetime
 from time import strftime
-
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-
 from . import ui
 
 try:
@@ -166,7 +167,7 @@ class Ui_MainWindow(QMainWindow):
 
     def setVideo(self, video):
         self.video = video
-        
+    #人脸识别button
     def btn_face_clicked(self):
         # print('facerec clicked')
         self.video.open(0)
@@ -176,7 +177,7 @@ class Ui_MainWindow(QMainWindow):
         self.facerec.setModel(self.model)
         self.facerec.setVideo(self.video)
         self.setCentralWidget(self.facerec)
-        
+    #人脸录入button
     def btn_register_clicked(self):
         self._timer.stop()
         
@@ -184,10 +185,10 @@ class Ui_MainWindow(QMainWindow):
         self.register.setModel(self.model)
         self.register.setVideo(self.video)
         self.setCentralWidget(self.register)
-
+    #退出button
     def btn_exit_clicked(self):
         exit(1)
-
+    #设置控件内容
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "人脸识别系统", None))
         self.label_date.setText(_translate("MainWindow", "    0000年00月00日", None))

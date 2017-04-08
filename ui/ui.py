@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
-
+#!/usr/bin/env python
+#  -- coding:utf-8 --
+# #@Time  : 2017/3/22
+# #@Author: Jee
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-# from PyQt4.QtWidgets import QApplication, QWidget, QDesktopWidget
-
 from facerec import recognize, train
 from facerec import face
 from camera import VideoStream
 from configure import config, userManager
-
 from .soft_keyboard import *
-
 import os
 import cv2
 
@@ -39,6 +37,7 @@ class VideoFrame(QtGui.QLabel):
         
     userName = None
     pen_faceRect = QtGui.QPen()
+    pen_faceRect.setWidth(3) #设置画笔粗细3px
     pen_faceRect.setColor(QtGui.QColor(255, 0, 0))
     x = 0;y = 0;w = 0;h = 0
     
@@ -84,7 +83,7 @@ class FaceRegister(QWidget):
         self.update()
 
     def setupUi(self, FaceRegister):
-        FaceRegister.setObjectName(_fromUtf8("FaceRegister"))
+        FaceRegister.setObjectName(_fromUtf8("FaceRegister")) #style样式引用
         FaceRegister.resize(800, 640)
         # FaceRegister.center()
 
@@ -92,31 +91,31 @@ class FaceRegister(QWidget):
 
         font = QtGui.QFont()
         font.setPointSize(16)
-
+        #顶部文字
         self.label_title = QtGui.QLabel(FaceRegister)
         self.label_title.setGeometry(QtCore.QRect(320, 20, 200, 60))
         self.label_title.setFont(font)
-
+        #进度条
         self.progressBar = QtGui.QProgressBar(FaceRegister)
         self.progressBar.setGeometry(QtCore.QRect(150, 440, 520, 60))
         self.progressBar.setRange(0, 20)
         self.progressBar.setValue(0)
         self.progressBar.setFont(font)
         self.progressBar.setVisible(False)
-
+        #摄像头窗口
         self.video_frame = VideoFrame(FaceRegister)
         self.video_frame.setGeometry(QtCore.QRect(150, 70, 500, 360))
-
+        #底部button
         self.pushButton_capture = QtGui.QPushButton(FaceRegister)
         self.pushButton_capture.setGeometry(QtCore.QRect(200, 520, 100, 60))
         self.pushButton_capture.setFont(font)
+        #开始button信号槽
         self.pushButton_capture.clicked.connect(self.pushButton_capture_clicked)
 
         self.pushButton_back = QtGui.QPushButton(FaceRegister)
         self.pushButton_back.setGeometry(QtCore.QRect(500, 520, 100, 60))
-        font = QtGui.QFont()
-        font.setPointSize(16)
         self.pushButton_back.setFont(font)
+        #返回button信号槽
         self.pushButton_back.clicked.connect(self.pushButton_back_clicked)
 
         self.retranslateUi(FaceRegister)
@@ -143,11 +142,11 @@ class FaceRegister(QWidget):
             w = 0;
             h = 0
             if self.faceRect is not None:
-                x, y, w, h = self.faceRect[0] * 0.75, self.faceRect[1] * 0.75, self.faceRect[2] * 0.75, \
-                             self.faceRect[3] * 0.75
+                x, y, w, h = self.faceRect[0] * 0.75, self.faceRect[1] * 0.75, \
+                             self.faceRect[2] * 0.75, self.faceRect[3] * 0.75
             self.video_frame.setRect(x, y, w, h)
             self.video_frame.setPixmap(pixMap_frame)
-            self.video_frame.setScaledContents(True)
+            self.video_frame.setScaledContents(True) #图片自适应窗口
         except TypeError:
             print('No frame')
 
@@ -166,12 +165,11 @@ class FaceRegister(QWidget):
             if not os.path.exists(personDir):
                 os.makedirs(personDir)
             fileName = os.path.join(personDir, 'face_' + '%03d.pgm' % self.captureFlag)
-            cv2.imwrite(fileName, crop)
+            cv2.imwrite(fileName, face.resize(crop))
             self.captureFlag -= 1
             self.progressBar.setValue(20 - self.captureFlag)
-            if self.captureFlag == 0:
+            if self.captureFlag == 0: #获取人脸图片结束
                 self.recOver = True
-                print('capture over')
                 self.video.release()
                 self.startPictureSelect()
 
@@ -190,14 +188,13 @@ class FaceRegister(QWidget):
             # self.inputDialog.clear()
         else:
             self.pushButton_capture.setEnabled(False)
-            self.captureFlag = 20
-            self.progressBar.setVisible(True)
-            self.label_title.setText('录入人脸信息')
+            self.captureFlag = 20 #获取20张人脸图片
+            self.progressBar.setVisible(True) #显示进度条
+            # self.label_title.setText('录入人脸信息')
             self._timer.start(10)
             self.startRec()
 
     def startPictureSelect(self):
-        print('start picture select')
         pictureSelect = PictureSelect(self.mainWindow, self.personName)
         pictureSelect.setModel(self.model)
         self.mainWindow.setCentralWidget(pictureSelect)
@@ -209,13 +206,13 @@ class FaceRegister(QWidget):
         self.inputDialog.clear()
 
     def pushButton_back_clicked(self):
-        self._timer.stop()
+        # self._timer.stop()
         self.video.release()
         self.mainWindow.setupUi(self.mainWindow)
 
     def retranslateUi(self, FaceRegister):
         FaceRegister.setWindowTitle(_translate("FaceRegister", "Form", None))
-        self.label_title.setText(_translate("FaceRegister", " ", None))
+        self.label_title.setText(_translate("FaceRegister", "录入人脸信息", None))
         self.video_frame.setText(_translate("FaceRegister", " ", None))
         self.pushButton_capture.setText(_translate("FaceRegister", "开始", None))
         self.pushButton_back.setText(_translate("FaceRegister", "返回", None))
@@ -421,7 +418,7 @@ class PictureSelect(QWidget):
         
     def setupUi(self, pictureSelect):
         pictureSelect.setObjectName(_fromUtf8("pictureSelect"))
-        pictureSelect.resize(800, 640)
+        # pictureSelect.resize(800, 640)
         
         self.setStyleSheet(style)
         
@@ -433,13 +430,13 @@ class PictureSelect(QWidget):
         self.label_info.setFont(font)
         
         self.scrollArea = QtGui.QScrollArea(pictureSelect)
-        self.scrollArea.setGeometry(QtCore.QRect(100, 80, 600, 400))
+        self.scrollArea.setGeometry(QtCore.QRect(135, 80, 530, 400)) #图片窗口
         self.scrollArea.setWidgetResizable(False)
         self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         
         self.scrollAreaWidgetContents = QtGui.QWidget()
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 600, 548))
-        
+
         self.gridLayoutWidget = QtGui.QWidget(self.scrollArea)
         
         self.gridLayout = QtGui.QGridLayout(self.gridLayoutWidget)
@@ -492,7 +489,7 @@ class PictureSelect(QWidget):
             label_pic.setFixedSize(QSize(w, h))
             label_pic.setPixmap(self.pictures[i])
             label_pic.setPictureName(self.pictureNames[i])
-            self.gridLayout.addWidget(label_pic, i/2, i%2, 1, 1)
+            self.gridLayout.addWidget(label_pic, i/5, i%5, 1, 1) #设置图片选择窗口每行显示5张
         self.gridLayoutWidget.setFixedSize(self.gridLayout.sizeHint())
 
     def trainFinish(self):
@@ -509,7 +506,7 @@ class PictureSelect(QWidget):
             item = self.gridLayout.itemAt(i)
             if item is not None:
                 label_pic = item.widget()
-                print(label_pic.pictureName)
+                # print(label_pic.pictureName)
                 if label_pic.selected:
                     print('delete',label_pic.pictureName)
                     os.remove(os.path.join(config.FACES_DIR, self.path, label_pic.pictureName))
