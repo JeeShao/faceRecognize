@@ -511,6 +511,7 @@ class PictureSelect(QWidget):
     def trainFinish(self):
         dialog = QtGui.QMessageBox()
         dialog.setWindowTitle('info')
+        dialog.setWindowModality(Qt.ApplicationModal) #阻塞其他窗口
         font = QtGui.QFont()
         font.setPointSize(11)
         dialog.setFont(font)

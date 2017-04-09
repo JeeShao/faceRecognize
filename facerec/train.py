@@ -17,7 +17,7 @@ def walkFiles(walkDir, match = '*'):
 
 def prepareImage(fileName):
     return face.resize(cv2.imread(fileName, cv2.IMREAD_GRAYSCALE))
-
+#归一化
 def normalize(X, low, high, dtype=None):
     X = np.asarray(X)
     minX, maxX = np.min(X), np.max(X)
@@ -30,7 +30,7 @@ def normalize(X, low, high, dtype=None):
     if dtype is None:
         return np.asarray(X)
     return np.asarray(X, dtype=dtype)
-
+#训练
 def trainFace(model):
     
     TRAINING_FILE = os.path.join(config.TRAINING_DIR, config.TRAINING_FILE) 
