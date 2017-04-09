@@ -8,8 +8,10 @@ def detectSingleFace(image):
     """ 返回脸部区域的边界(x, y, width, height)
         如果没有检测到人脸则返回None
     """
-    faces = haar_faces.detectMultiScale(image, scaleFactor=config.HAAR_SCALE_FACTOR,
-            minNeighbors=config.HAAR_MIN_NEIGHBORS, minSize=config.HAAR_MIN_SIZE,
+    faces = haar_faces.detectMultiScale(image,
+            scaleFactor=config.HAAR_SCALE_FACTOR,
+            minNeighbors=config.HAAR_MIN_NEIGHBORS,
+            minSize=config.HAAR_MIN_SIZE,
             flags=cv2.CASCADE_SCALE_IMAGE)
     #是否检测到人脸
     if len(faces) != 1:

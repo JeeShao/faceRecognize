@@ -101,7 +101,7 @@ class FaceRegister(QWidget):
         self.label_title.setFont(font)
         #进度条
         self.progressBar = QtGui.QProgressBar(FaceRegister)
-        self.progressBar.setGeometry(QtCore.QRect(150, 440, 520, 60))
+        self.progressBar.setGeometry(QtCore.QRect(150, 440, 520, 50))
         self.progressBar.setRange(0, 20)
         self.progressBar.setValue(0)
         self.progressBar.setFont(font)
@@ -153,13 +153,13 @@ class FaceRegister(QWidget):
             self.video_frame.setScaledContents(True) #图片自适应窗口
         except TypeError:
             print('No frame')
-
+    #检测人脸
     def startRec(self):
         self.recognizer = recognize.Recognizer()
         self.recognizer.finished.connect(self.reciveRecognizeResult)
         image = self.video.getGrayCVImage()
         self.recognizer.startRec(image, self.model)
-
+    #获取人脸检测结果
     def reciveRecognizeResult(self):
         self.faceRect = self.recognizer.result
         if self.faceRect is not None and self.captureFlag != 0:
@@ -229,7 +229,7 @@ class FaceRec(QWidget):
     label = ''
     faceRect = None
     
-    captureFlag = 0
+    # captureFlag = 0
     
     confidences = []
     
@@ -277,9 +277,9 @@ class FaceRec(QWidget):
         self.retranslateUi(FaceRec)
         QtCore.QMetaObject.connectSlotsByName(FaceRec)
 
-    def pushButton_capture_clicked(self):
-        print('capture clicked')
-        self.captureFlag = 10
+    # def pushButton_capture_clicked(self):
+    #     print('capture clicked')
+    #     self.captureFlag = 10
 
     def pushButton_back_clicked(self):
         self._timer.stop()
@@ -287,8 +287,8 @@ class FaceRec(QWidget):
         self.video.release()
         self.mainWindow.setupUi(self.mainWindow)
 
-    def pushButton_capture_clicked(self):
-        self.startRec()
+    # def pushButton_capture_clicked(self):
+    #     self.startRec()
 
     def setVideo(self, video):
         self.video = video
@@ -338,8 +338,7 @@ class FaceRec(QWidget):
                     self.video_frame.setRectColor(0, 255, 0)
                 else:
                     self.video_frame.setRectColor(255, 0, 0)
-            
-            info = 'user: ' + str(userName) + ' | confidence: ' + str(self.recognizer.confidence)
+            info = 'user: ' + str(userName) + ' <b>|</b> confidence: ' + str(self.recognizer.confidence)
             self.label_info.setText(info)
             self.startRec()
 
@@ -569,9 +568,9 @@ class TrainThread(QtCore.QThread):
         
     def run(self):
         train.trainFace(self.model)
-        print('train faces over')
+        print('人脸训练完毕')
         self.model.load(self.trainFileName)
-        print('model reload over')
+        print('模型加载完毕')
 
 #显示单个图像的Qt控件
 class PictureLabel(QtGui.QLabel):

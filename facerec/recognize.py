@@ -24,11 +24,13 @@ class Recognizer(QThread):
         self.result = face.detectSingleFace(self.faceImage)
         
         if self.result is None:
+            print('未检测到人脸(recognize)')
             # print 'Could not detect single face!'
             return
 
         if self.model is None:
             # only return result when model is None
+            print("model is None(recognize)")
             return
         else:
             # print 'face detected'
@@ -42,5 +44,5 @@ class Recognizer(QThread):
         self.faceImage = image
         self.model = model
         
-        self.start()
+        self.start() #线程 ，运行run()
  
