@@ -23,7 +23,7 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-# style = open('./ui/css/style.css').read()
+style = open('./ui/css/style.css').read()
 
 class Ui_MainWindow(QMainWindow):
     model = None
@@ -44,27 +44,13 @@ class Ui_MainWindow(QMainWindow):
         
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+
+        #按钮（垂直布局）
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
-
-        self.label_date = QtGui.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(20)
-        self.label_date.setFont(font)
-        self.verticalLayout.addWidget(self.label_date)
-
-        self.lcd_time = QtGui.QLCDNumber(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(20)
-        self.lcd_time.setFont(font)
-        self.lcd_time.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor)) #set cursor style
-        self.lcd_time.setDigitCount(8) #设置LCD显示位数
-        self.lcd_time.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.lcd_time.setLineWidth(0) #无边框
-        self.verticalLayout.addWidget(self.lcd_time)
 
         self.label_welcome = QtGui.QLabel(self.centralwidget)
         font = QtGui.QFont()
-        font.setPointSize(28)
+        font.setPointSize(32)
         self.label_welcome.setFont(font)
         self.label_welcome.setAlignment(QtCore.Qt.AlignCenter)
         self.verticalLayout.addWidget(self.label_welcome)
@@ -86,6 +72,7 @@ class Ui_MainWindow(QMainWindow):
         font = QtGui.QFont()
         font.setPointSize(26)
         self.btn_register.setFont(font)
+        # self.btn_register.setMaximumWidth(200)
         self.gridLayout_buttons.addWidget(self.btn_register, 0, 0, 1, 1) #（行，列，占用行数，占用列数）
         #button人脸录入信号槽
         self.btn_register.clicked.connect(self.btn_register_clicked)
@@ -113,11 +100,43 @@ class Ui_MainWindow(QMainWindow):
         self.btn_exit.clicked.connect(self.btn_exit_clicked)
 
         self.verticalLayout.addLayout(self.gridLayout_buttons)
+
+        #底部显示
+        self.horizontallayout = QtGui.QHBoxLayout()  # 00
+
+        self.author = QtGui.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        self.author.setFont(font)
+        self.horizontallayout.addWidget(self.author)  # 00
+        # self.horizontallayout.addStretch(1)
+
+        self.label_date = QtGui.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        self.label_date.setFont(font)
+        self.horizontallayout.addWidget(self.label_date)  # 00
+
+        self.lcd_time = QtGui.QLCDNumber(self.centralwidget)
+        # font = QtGui.QFont()
+        # font.setPointSize(20)
+        # self.lcd_time.setFont(font)
+        # pe = QPalette()  # 设置提示信息颜色
+        # pe.setColor(QPalette.WindowText, Qt.red)
+        # self.lcd_time.setPalette(pe)
+        self.lcd_time.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))  # set cursor style
+        self.lcd_time.setDigitCount(8)  # 设置LCD显示位数
+        self.lcd_time.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.lcd_time.setLineWidth(0)  # 无边框
+        self.horizontallayout.addWidget(self.lcd_time) # 00
+        self.horizontallayout.setContentsMargins(10,35,0,0) #左 上 右 下
+        # self.verticalLayout.addStretch(1)
+        self.verticalLayout.addLayout(self.horizontallayout)
+
         #vbox占比分配
-        self.verticalLayout.setStretch(0, 1)  #label_date
-        self.verticalLayout.setStretch(1, 1)  #lcd
-        self.verticalLayout.setStretch(2, 2)  #welcome_label
-        self.verticalLayout.setStretch(3, 4)  #gridLayout_buttons
+        self.verticalLayout.setStretch(0, 2)  #welcome_label
+        self.verticalLayout.setStretch(1, 5)  #gridLayout_buttons
+        self.verticalLayout.setStretch(2, 1)  # horizontallayout
 
         MainWindow.setCentralWidget(self.centralwidget) #中心窗口
         exit = QtGui.QAction(QtGui.QIcon('icons/exit.png'), 'Exit', self)
@@ -197,4 +216,5 @@ class Ui_MainWindow(QMainWindow):
         self.btn_register.setText("人脸录入")
         self.btn_face.setText("人脸识别")
         self.btn_exit.setText("退出")
+        self.author.setText("Author:Jee")
 
