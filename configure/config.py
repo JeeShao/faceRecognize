@@ -59,4 +59,5 @@ TRAINING_DIR = BASE_DIR + '/facerec/training'
 TRAINING_FILE = TRAINING_DIR + '/training.xml'
 
 #user csv file
-USERS_CVS_FILE = BASE_DIR + '/facerec/training/users.csv'
+USERS_CSV_FILE = BASE_DIR + '/facerec/training/users.csv'
+ZHUSERS_CSV_FILE = BASE_DIR + '/facerec/training/ZhUsers.csv'

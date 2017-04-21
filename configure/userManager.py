@@ -21,8 +21,10 @@ class UserManager(object):
     userIds = []
     userNames = []
     fieldNames = ['userName', 'id']
+    ZhFieldNames = ['ZhName','EngName']
     
-    __CSVFile = config.USERS_CVS_FILE
+    __CSVFile = config.USERS_CSV_FILE
+    __ZhCsvFile = config.ZHUSERS_CSV_FILE
 
     def __init__(self, csvFile=None):
         '''
@@ -30,6 +32,7 @@ class UserManager(object):
         '''
         if csvFile != None:
             self.__CSVFile = csvFile
+            self.__ZhCsvFile = __ZhCsvFile
         
     def hasUser(self, user):
         if type(user) is str:
@@ -144,3 +147,69 @@ class UserManager(object):
 
         elif type(data) is dict:
             pass
+
+    #一下函数处理中文用户名的csv文件
+    def readZhCSV(self):
+        self.zhCsvIn = open(self.__ZhCsvFile, 'rb')
+        self.reader = csv.DictReader(codecs.iterdecode(self.zhCsvIn, 'gbk'), self.ZhFieldNames)
+        self.ZhUsers = []
+        self.userZhName = []
+        self.userEngName = []
+        for row in self.reader:
+            self.ZhUsers.append(row)
+            self.userZhName.append(row['ZhName'])
+            self.userEngName.append(row['EngName'])
+        print(self.ZhUsers)
+        self.zhCsvIn.close()
+
+    def writeZhCSV(self, data):
+        print(data)
+        if type(data) is list:
+            self.csvOut = open(self.__ZhCsvFile, 'w', newline='')
+            self.writer = csv.DictWriter(self.csvOut, self.ZhFieldNames)
+            self.writer.writerows(data)
+            self.csvOut.close()
+
+        elif type(data) is dict:
+            self.csvOut = open(self.__ZhCsvFile, 'a', newline='')
+            self.writer = csv.DictWriter(self.csvOut, self.ZhFieldNames)
+            # print('user append')
+            self.writer.writerow(data)
+            self.csvOut.close()
+
+    def addZhUser(self, name):
+        if self.hasZhUser(name):
+            return False
+        else:
+            userEngNames = self.getAllZhUserEngName()
+            if userEngNames == []:
+                newId = 1
+            else:
+                userEngNames.sort()
+                newId = int(userEngNames[len(userEngNames)-1].split('_')[1]) + 1
+            newZhUser = {'ZhName': name, 'EngName': str('zh_%d'%newId)}
+            self.ZhUsers.append(newZhUser)
+
+            self.writeZhCSV(newZhUser)
+            return str('zh_%d'%newId)
+
+    def hasZhUser(self, user):
+        zhUserNames = self.getAllZhUserZhName()
+        if zhUserNames.__contains__(user):
+            return True
+        else:
+            return False
+
+    def getAllZhUserZhName(self):
+        self.readZhCSV()
+        return self.userZhName
+
+    def getAllZhUserEngName(self):
+        self.readZhCSV()
+        return self.userEngName
+
+    def getZhNamebyEngName(self,EngName):
+        self.readZhCSV()
+        for ZhUser in self.ZhUsers:
+            if ZhUser['EngName'] == EngName:
+                return ZhUser['ZhName']

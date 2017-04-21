@@ -11,6 +11,7 @@ from configure import config, userManager
 from .soft_keyboard import *
 import os
 import cv2
+import re
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -169,7 +170,6 @@ class FaceRegister(QWidget):
             if not os.path.exists(personDir):
                 os.makedirs(personDir)
             fileName = os.path.join(personDir, 'face_' + '%03d.pgm' % self.captureFlag)
-            print(fileName)
             cv2.imwrite(fileName, face.resize(crop))
             self.captureFlag -= 1
             self.progressBar.setValue(20 - self.captureFlag)
@@ -183,10 +183,13 @@ class FaceRegister(QWidget):
 
     def reciveUserName(self, name):
         self.personName = str(name)
-
-        # self.inputDialog.deleteLater()
+        if self.Chinese(self.personName):
+            self.personName = self.manager.addZhUser(self.personName)
+            if not self.personName:
+                self.inputDialog.seterrMsg('用户已存在!')
         personDir = os.path.join(config.FACES_DIR, self.personName)
-        if name=='':
+        # self.inputDialog.deleteLater()
+        if self.personName=='':
             self.inputDialog.seterrMsg('用户名不能为空!')
         elif os.path.exists(personDir):
             self.inputDialog.seterrMsg('用户已存在!')
@@ -199,6 +202,17 @@ class FaceRegister(QWidget):
             # self.label_title.setText('录入人脸信息')
             self._timer.start(10)
             self.startRec()
+
+    #判断中文用户名
+    def Chinese(self,chinese_str):
+        zhPattern = re.compile(u'[\u4e00-\u9fa5]+')
+        # 一个小应用，判断一段文本中是否包含简体中：
+        match = zhPattern.search(chinese_str)
+        if match:
+            return True
+        else:
+            return False
+
 
     def startPictureSelect(self):
         pictureSelect = PictureSelect(self.mainWindow, self.personName)
@@ -273,8 +287,6 @@ class FaceRec(QWidget):
         self.pushButton_back.setFont(font)
         self.pushButton_back.clicked.connect(self.pushButton_back_clicked)
 
-        
-
 
         self.retranslateUi(FaceRec)
         QtCore.QMetaObject.connectSlotsByName(FaceRec)
@@ -339,6 +351,8 @@ class FaceRec(QWidget):
 
                     if user is not None:
                         userName = user['userName']
+                        if 'zh_' in userName:  #中文名
+                            userName = self.manager.getZhNamebyEngName(userName)
                         if not userName in self.userInfo.keys():
                             self.userInfo[userName]=1
                         else:
