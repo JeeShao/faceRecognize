@@ -216,5 +216,5 @@ class Ui_MainWindow(QMainWindow):
         self.btn_register.setText("人脸录入")
         self.btn_face.setText("人脸识别")
         self.btn_exit.setText("退出")
-        self.author.setText("Author:Jee")
+        self.author.setText("Author:邵健")
 
