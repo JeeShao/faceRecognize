@@ -1,31 +1,43 @@
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-import sys
+#!/usr/bin/env python
+#  -- coding:utf-8 --
+# #@Time  : 2017/3/22
+# #@Author: Jee
+import cv2
+import numpy as np
 
-class Example(QWidget):
+img = cv2.imread("1.jpg")
+cv2.imshow("origin",img)
+thresholdco = 0.05
+histogram = [0]*256
 
-    def __init__(self):
-        super().__init__()
+rows = img.shape[0] #像素点行数
+cols = img.shape[1] #像素点列数
+for i in img:
+    for j in i:
+        b,g,r = j
+        gray = (r * 299 + g * 587 + b * 114) // 1000
+        histogram[gray] += 1
 
-        self.initUI()
+calnum = 0
+total = cols * rows
+for i in range(256):
+    if float(calnum)/total < thresholdco:
+        calnum += histogram[255-i]
+        num = i
+    else:break
 
-    def initUI(self):
+calnum = 0
+averagegray = 0
+for i in reversed(range(255-num,256)):
+    averagegray += histogram[i] * i
+    calnum += histogram[i]
 
-        self.setGeometry(300, 300, 300, 220)
+averagegray /=calnum
+co = 255.0/averagegray
+for i in range(rows):
+    for j in range(cols):
+        img[i,j] = [round(co*img[i,j][0]+0.5),round(co*img[i,j][1]+0.5),round(co*img[i,j][2]+0.5)]
+cv2.imshow("new",img)
 
-        self.center()
-
-        self.setWindowTitle('窗口居中')
-        self.show()
-
-    def position(self):
-        screen = QtGui.QDesktopWidget().screenGeometry()
-        size = self.geometry()
-        print(size.width()," ",size.height)
-        self.move((screen.width() - size.width()) / 2, (screen.height() - size.height()) / 2)
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = Example()
-    sys.exit(app.exec_())
+cv2.waitKey()
+cv2.destroyAllWindows()

@@ -12,7 +12,7 @@ from configure import config
 from PyQt4.QtGui import QApplication
 
 def main():
-    model = cv2.face.createLBPHFaceRecognizer()
+    model = cv2.face.createLBPHFaceRecognizer(threshold=70)
     model.load(config.TRAINING_FILE)
     
     video = Video.Video(0)

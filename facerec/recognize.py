@@ -36,7 +36,8 @@ class Recognizer(QThread):
             # crop
             crop = face.resize(face.crop(self.faceImage, x, y, w, h))
             self.label =self.model.predict(crop)[0]
-            self.confidence =round(self.model.predict(crop)[1],5)
+            if self.label != -1:
+                self.confidence =round(self.model.predict(crop)[1],5)
 
     def startRec(self, image, model):
         self.faceImage = image
