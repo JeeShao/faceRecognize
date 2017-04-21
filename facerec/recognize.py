@@ -25,11 +25,9 @@ class Recognizer(QThread):
         
         if self.result is None:
             print('未检测到人脸(recognize)')
-            # print 'Could not detect single face!'
             return
 
         if self.model is None:
-            # only return result when model is None
             print("model is None(recognize)")
             return
         else:

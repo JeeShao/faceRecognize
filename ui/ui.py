@@ -146,7 +146,7 @@ class FaceRegister(QWidget):
             w = 0;
             h = 0
             if self.faceRect is not None:
-                x, y, w, h = self.faceRect[0] * 0.75, self.faceRect[1] * 0.75, \
+                x, y, w, h = self.faceRect[0] * 0.8, self.faceRect[1] * 0.75, \
                              self.faceRect[2] * 0.75, self.faceRect[3] * 0.75
             self.video_frame.setRect(x, y, w, h)
             self.video_frame.setPixmap(pixMap_frame)
@@ -304,7 +304,7 @@ class FaceRec(QWidget):
             x = 0;y = 0;w = 0;h = 0
             if self.faceRect is not None:
                 #640x480 to 480x360
-                x, y, w, h = self.faceRect[0]*0.75, self.faceRect[1]*0.75, self.faceRect[2]*0.75, self.faceRect[3]*0.75
+                x, y, w, h = self.faceRect[0]*0.8, self.faceRect[1]*0.75, self.faceRect[2]*0.75, self.faceRect[3]*0.75
             self.video_frame.setRect(x, y, w, h)
             self.video_frame.setPixmap(pixMap_frame)
             self.video_frame.setScaledContents(True)
@@ -321,7 +321,7 @@ class FaceRec(QWidget):
         self.faceRect = self.recognizer.result
         userName = None
         if not self.video.is_release:
-            if self.recognizer.result is not None:
+            if self.faceRect is not None:
                 self.confidences.append(self.recognizer.confidence)
                 mean = sum(self.confidences) / float(len(self.confidences))
                 print('label:',self.recognizer.label)
