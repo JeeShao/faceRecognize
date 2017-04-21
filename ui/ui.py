@@ -169,6 +169,7 @@ class FaceRegister(QWidget):
             if not os.path.exists(personDir):
                 os.makedirs(personDir)
             fileName = os.path.join(personDir, 'face_' + '%03d.pgm' % self.captureFlag)
+            print(fileName)
             cv2.imwrite(fileName, face.resize(crop))
             self.captureFlag -= 1
             self.progressBar.setValue(20 - self.captureFlag)
@@ -228,11 +229,12 @@ class FaceRec(QWidget):
     confidence = -1
     label = ''
     faceRect = None
-    
+    k=0 #计数识别不出的人脸
     # captureFlag = 0
     
     confidences = []
-    
+    userInfo = {}
+
     def __init__(self, mainWindow):
         super(FaceRec, self).__init__()
         self.mainWindow = mainWindow
@@ -295,7 +297,9 @@ class FaceRec(QWidget):
         
         self.vs = VideoStream.VideoStream(self.video,'192.168.1.113', 8888)
         #self.vs.startStream()
-        
+        self.confidences.clear()
+        self.userInfo.clear()
+        self.k=0
         self.startRec()
         
     def playVideo(self):
@@ -322,25 +326,54 @@ class FaceRec(QWidget):
         userName = None
         if not self.video.is_release:
             if self.faceRect is not None:
-                self.confidences.append(self.recognizer.confidence)
-                mean = sum(self.confidences) / float(len(self.confidences))
-                print('label:',self.recognizer.label)
-                print('confidence: %.4f'%self.recognizer.confidence,'mean:%.4f'%mean)
+                if self.recognizer.confidence is not None:
+                    self.confidences.append(self.recognizer.confidence)
+                    print(self.confidences)
+                    mean = sum(self.confidences) / float(len(self.confidences))
+                    print('label:',self.recognizer.label)
+                    print('confidence: %.4f'%self.recognizer.confidence,'mean:%.4f'%mean)
 
-                user = self.manager.getUserById(self.recognizer.label)
+                    user = self.manager.getUserById(self.recognizer.label)
 
-                self.video_frame.setUserLabel(userName)
+                    self.video_frame.setUserLabel(userName)
 
-                if user is not None:
-                    userName = user['userName']
-
-                if self.recognizer.confidence <= 60:
-                    self.video_frame.setRectColor(0, 255, 0)
+                    if user is not None:
+                        userName = user['userName']
+                        if not userName in self.userInfo.keys():
+                            self.userInfo[userName]=1
+                        else:
+                            self.userInfo[userName]+=1
+                    if self.recognizer.confidence <= 60:
+                        self.video_frame.setRectColor(0, 255, 0)
+                    else:
+                        self.video_frame.setRectColor(255, 0, 0)
                 else:
-                    self.video_frame.setRectColor(255, 0, 0)
+                    self.k+=1
             info = 'user: ' + str(userName) + ' <b>|</b> confidence: ' + str(self.recognizer.confidence)
             self.label_info.setText(info)
-            self.startRec()
+            if len(self.confidences)>=20:
+                self.userInfo = sorted(self.userInfo.items(),key=lambda x:x[1],reverse=True)
+                nameRes = self.userInfo[0][0]
+                info_str = '识别结果:  %s  ' % nameRes
+                self.recFinished(info_str)
+            elif self.k>=50:
+                info_str = '无法识别当前人脸!'
+                self.recFinished(info_str)
+            else:
+                self.startRec()
+
+    def recFinished(self,info_str):
+        dialog = QtGui.QMessageBox()
+        dialog.setWindowTitle('info')
+        dialog.setWindowModality(Qt.ApplicationModal)  #
+        dialog.setFixedSize(300,300)
+        font = QtGui.QFont()
+        font.setPointSize(15)
+        dialog.setFont(font)
+        dialog.setText(info_str)
+        if dialog.exec_():
+            self.pushButton_back_clicked()
+
 
     def retranslateUi(self, FaceRec):
         FaceRec.setWindowTitle(_translate("FaceRec", "from", None))

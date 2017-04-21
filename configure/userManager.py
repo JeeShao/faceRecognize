@@ -124,8 +124,6 @@ class UserManager(object):
         if type(data) is list:
             self.csvOut = open(self.__CSVFile, 'w', newline='')
             self.writer = csv.DictWriter(self.csvOut, self.fieldNames)
-            print('user update all')
-            print(data)
             self.writer.writerows(data)
             self.csvOut.close()
             

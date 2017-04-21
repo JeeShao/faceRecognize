@@ -75,7 +75,7 @@ class Video():
     def getGrayCVImage(self, isFlip=True):
         if self.readFrame is not None:
             grayFrame = cv2.cvtColor(self.readFrame, cv2.COLOR_BGR2GRAY)
-            grayFrame = cv2.equalizeHist(grayFrame)
+            # grayFrame = cv2.equalizeHist(grayFrame)
             if isFlip == True:
                 grayFrame = cv2.flip(grayFrame, 1)
             return grayFrame
