@@ -478,11 +478,9 @@ class DelFace(QWidget):
             self.gridLayout.itemAt(i).widget().deleteLater()
 
     def showFaces(self):
-        print(self.faceNames)
         for i in range(0, len(self.faceNames)):
             if self.faceNames[i] in self.zhUserName:
                 self.faceNames[i] = self.manager.getZhNamebyEngName(self.faceNames[i])
-                print(self.faceNames[i])
             self.checkbox = QCheckBox(self.faceNames[i],self)
             self.checkbox.setFocusPolicy(QtCore.Qt.NoFocus)
             # checkbox.toggle() #默认选中
@@ -510,7 +508,6 @@ class DelFace(QWidget):
     def delFaceData(self,facename):
         if facename in self.manager.getAllZhUserZhName():
             facename = self.manager.getEngNamebyZhName(facename)
-            print(self.zhData)
             for i in range(0, len(self.zhData)):
                 if self.zhData[i]['EngName'] == facename:
                     del self.zhData[i]
@@ -521,7 +518,6 @@ class DelFace(QWidget):
             if self.data[i]['userName'] == facename:
                 del self.data[i]
                 break
-
 
     def delFinished(self,info_str):
         self.manager.writeCSV(self.data)
@@ -535,20 +531,20 @@ class DelFace(QWidget):
         font.setPointSize(15)
         dialog.setFont(font)
         dialog.setText(info_str)
-        # if dialog.exec_():
+        if dialog.exec_():
+            pass
             # self.pushButton_back_clicked()
-
-
 
     def pushButton_back_clicked(self):
         self.gridLayout = None
         self.pictures = []
         self.pictureNames = []
+        self.destroy()
         self.mainWindow.setupUi(self.mainWindow)
 
     def retranslateUi(self, DelFace):
         DelFace.setWindowTitle(_translate("DelFace", "Form", None))
-        self.label_info.setText(_translate("DelFace", "选择要删除的人脸，点击删除按钮进行删除", None))
+        self.label_info.setText(_translate("DelFace", "勾选预删除的人脸名，点击删除按钮进行删除", None))
         self.pushButton_back.setText(_translate("DelFace", "返回", None))
         self.pushButton_delete.setText(_translate("DelFace", "删除", None))
 

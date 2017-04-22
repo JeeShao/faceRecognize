@@ -16,9 +16,10 @@ def main():
     model.load(config.TRAINING_FILE)
     
     video = Video.Video(0)
+    video.release()
     video.setFrameSize(640, 480)
     video.setFPS(30)
-    
+
     QtApp = QApplication(sys.argv)
     
     mainWindow = mainwindow.Ui_MainWindow()

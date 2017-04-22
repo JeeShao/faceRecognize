@@ -174,11 +174,11 @@ class Ui_MainWindow(QMainWindow):
         self._timer.start(1000)
         self.update()
 
-    def center(self):
-        screen = QtGui.QDesktopWidget().screenGeometry()
-        size = self.geometry()
-        print(size.width()," ",size.height)
-        self.move((screen.width() - size.width()) / 2, (screen.height() - size.height()) / 2)
+    # def center(self):
+    #     screen = QtGui.QDesktopWidget().screenGeometry()
+    #     size = self.geometry()
+    #     print(size.width()," ",size.height)
+    #     self.move((screen.width() - size.width()) / 2, (screen.height() - size.height()) / 2)
 
     def updateTime(self):
         # date = datetime.datetime.now().strftime('    %Y-%m-%d')
@@ -199,8 +199,8 @@ class Ui_MainWindow(QMainWindow):
         self.video = video
     #人脸识别button
     def btn_face_clicked(self):
-        # print('facerec clicked')
-        self.video.open(0)
+        if self.video.is_release:
+            self.video.open(0)
         self._timer.stop()
         
         self.facerec = ui.FaceRec(self)

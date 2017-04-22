@@ -73,16 +73,6 @@ class UserManager(object):
             return True
         else:
             return False
-        
-    def deleteUser(self, userName):
-        if self.hasUser(userName):
-            userNames = self.getAllUserName()
-            index = userNames.index(userName)
-            self.users.__delitem__(index)
-            self.writeCSV(self.users)
-            return True
-        else:
-            return False
 #         
     def setCSVFile(self, fileName):
         self.__CSVFile = fileName
