@@ -12,6 +12,7 @@ from .soft_keyboard import *
 import os
 import cv2
 import re
+import shutil
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -187,6 +188,7 @@ class FaceRegister(QWidget):
             self.personName = self.manager.addZhUser(self.personName)
             if not self.personName:
                 self.inputDialog.seterrMsg('用户已存在!')
+                return
         personDir = os.path.join(config.FACES_DIR, self.personName)
         # self.inputDialog.deleteLater()
         if self.personName=='':
@@ -396,6 +398,159 @@ class FaceRec(QWidget):
         self.label_info.setText(_translate("FaceRec", "label_info", None))
         self.pushButton_back.setText(_translate("FaceRec", "返回", None))
 
+#删除人脸
+class DelFace(QWidget):
+
+    faceNames = []
+    model = None
+
+    def __init__(self,mainWindow):
+        super(DelFace, self).__init__()
+        self.mainWindow = mainWindow
+        self.manager = userManager.UserManager()
+        self.data = self.manager.getAllUser() #csv文件数据
+        self.zhData = self.manager.getAllZhUser() #中文用户csv数据
+
+        self.zhUserName = self.manager.getAllZhUserEngName()
+
+        self.setupUi(self)
+        self.readFaces()
+        self.showFaces()
+
+        self._timer = QtCore.QTimer(self)
+        self._timer.start(10)
+        self.update()
+
+    def setupUi(self,DelFace):
+        DelFace.setObjectName(_fromUtf8("DelFace"))  # style样式引用
+        DelFace.resize(800, 640)
+
+        font = QtGui.QFont()
+        font.setPointSize(18)
+
+        self.label_info = QtGui.QLabel(DelFace)
+        self.label_info.setGeometry(QtCore.QRect(160, 20, 480, 50))
+        self.label_info.setFont(font)
+
+        self.scrollArea = QtGui.QScrollArea(DelFace)
+        self.scrollArea.setGeometry(QtCore.QRect(135, 80, 530, 400))  # 图片窗口
+        self.scrollArea.setWidgetResizable(False)
+        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+
+        self.scrollAreaWidgetContents = QtGui.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 600, 548))
+
+        self.gridLayoutWidget = QtGui.QWidget(self.scrollArea)
+
+        self.gridLayout = QtGui.QGridLayout(self.gridLayoutWidget)
+
+        self.scrollArea.setWidget(self.gridLayoutWidget)
+
+        font = QtGui.QFont()
+        font.setPointSize(16)
+
+        self.pushButton_delete = QtGui.QPushButton(DelFace)
+        self.pushButton_delete.setGeometry(QtCore.QRect(200, 520, 100, 60))
+        self.pushButton_delete.setFont(font)
+        self.pushButton_delete.clicked.connect(self.pushButton_delete_clicked)
+
+        self.pushButton_back = QtGui.QPushButton(DelFace)
+        self.pushButton_back.setGeometry(QtCore.QRect(500, 520, 100, 60))
+        self.pushButton_back.setFont(font)
+        self.pushButton_back.setObjectName(_fromUtf8("pushButton_back"))
+        self.pushButton_back.clicked.connect(self.pushButton_back_clicked)
+
+        self.retranslateUi(DelFace)
+        QtCore.QMetaObject.connectSlotsByName(DelFace)
+
+    def setModel(self,model):
+        self.model = model
+    def readFaces(self):
+        self.faceNames = []
+        path = config.FACES_DIR
+        for dirName in train.walkDirs(path):
+            faceName = dirName.split('faces\\')[1] #人脸名
+            self.faceNames.append(faceName)
+
+
+    def clearGridLayout(self):
+        for i in reversed(list(range(self.gridLayout.count()))):
+            self.gridLayout.itemAt(i).widget().deleteLater()
+
+    def showFaces(self):
+        print(self.faceNames)
+        for i in range(0, len(self.faceNames)):
+            if self.faceNames[i] in self.zhUserName:
+                self.faceNames[i] = self.manager.getZhNamebyEngName(self.faceNames[i])
+                print(self.faceNames[i])
+            self.checkbox = QCheckBox(self.faceNames[i],self)
+            self.checkbox.setFocusPolicy(QtCore.Qt.NoFocus)
+            # checkbox.toggle() #默认选中
+            # self.connect(self.checkbox, QtCore.SIGNAL('stateChanged(int)'), self.checkUser)
+            self.gridLayout.addWidget(self.checkbox, i / 3, i % 3, 1, 1)
+            self.gridLayoutWidget.setFixedSize(self.gridLayout.sizeHint())
+
+    def pushButton_delete_clicked(self):
+        self.pushButton_delete.setEnabled(False)
+        for i in range(self.gridLayout.count()):
+            item = self.gridLayout.itemAt(i)
+            if item is not None:
+                checkbox = item.widget()
+                # print(label_pic.pictureName)
+                if checkbox.isChecked():
+                    self.delFaceData(checkbox.text())
+        #删除完成 重写csv 重新训练模型 重新加载面板
+        self.delFinished("完成人脸删除")
+        self.clearGridLayout() #清空checkbox
+        self.readFaces()
+        self.showFaces()
+        self.pushButton_delete.setEnabled(True)
+
+    #处理删除人脸文件和CSV数据
+    def delFaceData(self,facename):
+        if facename in self.manager.getAllZhUserZhName():
+            facename = self.manager.getEngNamebyZhName(facename)
+            print(self.zhData)
+            for i in range(0, len(self.zhData)):
+                if self.zhData[i]['EngName'] == facename:
+                    del self.zhData[i]
+                    break
+        shutil.rmtree(os.path.join(config.FACES_DIR, facename))  # 删除目录
+        print(facename,"目录已删除")
+        for i in range(0,len(self.data)):
+            if self.data[i]['userName'] == facename:
+                del self.data[i]
+                break
+
+
+    def delFinished(self,info_str):
+        self.manager.writeCSV(self.data)
+        self.manager.writeZhCSV(self.zhData)
+        train.trainFace(self.model)
+        dialog = QtGui.QMessageBox()
+        dialog.setWindowTitle('info')
+        dialog.setWindowModality(Qt.ApplicationModal)  #
+        dialog.setFixedSize(300,300)
+        font = QtGui.QFont()
+        font.setPointSize(15)
+        dialog.setFont(font)
+        dialog.setText(info_str)
+        # if dialog.exec_():
+            # self.pushButton_back_clicked()
+
+
+
+    def pushButton_back_clicked(self):
+        self.gridLayout = None
+        self.pictures = []
+        self.pictureNames = []
+        self.mainWindow.setupUi(self.mainWindow)
+
+    def retranslateUi(self, DelFace):
+        DelFace.setWindowTitle(_translate("DelFace", "Form", None))
+        self.label_info.setText(_translate("DelFace", "选择要删除的人脸，点击删除按钮进行删除", None))
+        self.pushButton_back.setText(_translate("DelFace", "返回", None))
+        self.pushButton_delete.setText(_translate("DelFace", "删除", None))
 
 #用户名输入控件
 class InputDialog(QWidget):
@@ -618,6 +773,8 @@ class TrainThread(QtCore.QThread):
         print('人脸训练完毕')
         self.model.load(self.trainFileName)
         print('模型加载完毕')
+
+#复选框
 
 #显示单个图像的Qt控件
 class PictureLabel(QtGui.QLabel):

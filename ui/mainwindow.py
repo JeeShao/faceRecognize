@@ -54,6 +54,7 @@ class Ui_MainWindow(QMainWindow):
         self.label_welcome.setFont(font)
         self.label_welcome.setAlignment(QtCore.Qt.AlignCenter)
         self.verticalLayout.addWidget(self.label_welcome)
+        self.verticalLayout.setSpacing(20)
 
         self.gridLayout_buttons = QtGui.QGridLayout()
         self.gridLayout_buttons.setSizeConstraint(QtGui.QLayout.SetMaximumSize)
@@ -65,12 +66,14 @@ class Ui_MainWindow(QMainWindow):
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
 
+        font = QtGui.QFont()
+        font.setPointSize(26)
+
         #人脸录入button
         self.btn_register = QtGui.QPushButton(self.centralwidget)
         sizePolicy.setHeightForWidth(self.btn_register.sizePolicy().hasHeightForWidth())# 首选Height取决于width
         self.btn_register.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setPointSize(26)
+
         self.btn_register.setFont(font)
         # self.btn_register.setMaximumWidth(200)
         self.gridLayout_buttons.addWidget(self.btn_register, 0, 0, 1, 1) #（行，列，占用行数，占用列数）
@@ -81,12 +84,19 @@ class Ui_MainWindow(QMainWindow):
         self.btn_face = QtGui.QPushButton(self.centralwidget)
         sizePolicy.setHeightForWidth(self.btn_face.sizePolicy().hasHeightForWidth())  # 首选Height取决于width
         self.btn_face.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setPointSize(26)
         self.btn_face.setFont(font)
         self.gridLayout_buttons.addWidget(self.btn_face, 1, 0, 1, 1)
         # button人脸识别信号槽
         self.btn_face.clicked.connect(self.btn_face_clicked)
+
+        #删除人脸
+        self.btn_del_face = QtGui.QPushButton(self.centralwidget)
+        sizePolicy.setHeightForWidth(self.btn_del_face.sizePolicy().hasHeightForWidth())  # 首选Height取决于width
+        self.btn_del_face.setSizePolicy(sizePolicy)
+        self.btn_del_face.setFont(font)
+        self.gridLayout_buttons.addWidget(self.btn_del_face, 2, 0, 1, 1)
+        # button人脸识别信号槽
+        self.btn_del_face.clicked.connect(self.btn_del_face_clicked)
 
         # 退出button
         self.btn_exit = QtGui.QPushButton(self.centralwidget)
@@ -95,7 +105,7 @@ class Ui_MainWindow(QMainWindow):
         font = QtGui.QFont()
         font.setPointSize(26)
         self.btn_exit.setFont(font)
-        self.gridLayout_buttons.addWidget(self.btn_exit, 2, 0, 1, 1)
+        self.gridLayout_buttons.addWidget(self.btn_exit, 3, 0, 1, 1)
         #button退出信号槽
         self.btn_exit.clicked.connect(self.btn_exit_clicked)
 
@@ -134,8 +144,8 @@ class Ui_MainWindow(QMainWindow):
         self.verticalLayout.addLayout(self.horizontallayout)
 
         #vbox占比分配
-        self.verticalLayout.setStretch(0, 2)  #welcome_label
-        self.verticalLayout.setStretch(1, 5)  #gridLayout_buttons
+        self.verticalLayout.setStretch(0, 1)  #welcome_label
+        self.verticalLayout.setStretch(1, 7)  #gridLayout_buttons
         self.verticalLayout.setStretch(2, 1)  # horizontallayout
 
         MainWindow.setCentralWidget(self.centralwidget) #中心窗口
@@ -200,11 +210,18 @@ class Ui_MainWindow(QMainWindow):
     #人脸录入button
     def btn_register_clicked(self):
         self._timer.stop()
-        
+
         self.register = ui.FaceRegister(self)
         self.register.setModel(self.model)
         self.register.setVideo(self.video)
         self.setCentralWidget(self.register)
+    #删除人脸
+    def btn_del_face_clicked(self):
+        self._timer.stop()
+
+        self.delFace = ui.DelFace(self)
+        self.delFace.setModel(self.model)
+        self.setCentralWidget(self.delFace)
     #退出button
     def btn_exit_clicked(self):
         exit(1)
@@ -213,8 +230,9 @@ class Ui_MainWindow(QMainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "人脸识别系统", None))
         self.label_date.setText(_translate("MainWindow", "    0000年00月00日", None))
         self.label_welcome.setText(str("人脸识别系统"))
-        self.btn_register.setText("人脸录入")
-        self.btn_face.setText("人脸识别")
+        self.btn_register.setText("录入人脸")
+        self.btn_face.setText("识别人脸")
+        self.btn_del_face.setText("删除人脸")
         self.btn_exit.setText("退出")
         self.author.setText("Author:邵健")
 

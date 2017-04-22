@@ -59,7 +59,7 @@ class UserManager(object):
             newUser = {'userName':name, 'id':str(newId)}
             self.users.append(newUser)
             
-            self.__writeCSV(newUser)
+            self.writeCSV(newUser)
             
             return newId
         
@@ -69,7 +69,7 @@ class UserManager(object):
             userNames = self.getAllUserName()
             index = userNames.index(old)
             self.users[index]['userName'] = str(new)
-            self.__writeCSV(self.users)
+            self.writeCSV(self.users)
             return True
         else:
             return False
@@ -79,7 +79,7 @@ class UserManager(object):
             userNames = self.getAllUserName()
             index = userNames.index(userName)
             self.users.__delitem__(index)
-            self.__writeCSV(self.users)
+            self.writeCSV(self.users)
             return True
         else:
             return False
@@ -88,30 +88,30 @@ class UserManager(object):
         self.__CSVFile = fileName
 #         
     def getUserByName(self, name):
-        self.__readCSV()
+        self.readCSV()
         for user in self.users:
             if user['userName'] == name:
                 return user
 #         
     def getUserById(self, id):
-        self.__readCSV()
+        self.readCSV()
         for user in self.users:
             if int(user['id']) == id:
                 return user
 
     def getAllUser(self):
-        self.__readCSV()
+        self.readCSV()
         return self.users
 #         
     def getAllUserName(self):
-        self.__readCSV()
+        self.readCSV()
         return self.userNames
 #         
     def getAllUserId(self):
-        self.__readCSV()
+        self.readCSV()
         return self.userIds
             
-    def __readCSV(self):
+    def readCSV(self):
         self.csvIn = open(self.__CSVFile, 'rb')
         self.reader = csv.DictReader(codecs.iterdecode(self.csvIn, 'utf-8'), self.fieldNames)
         self.users = []
@@ -123,7 +123,7 @@ class UserManager(object):
             self.userNames.append(row['userName'])
         self.csvIn.close()
 
-    def __writeCSV(self, data):
+    def writeCSV(self, data):
         if type(data) is list:
             self.csvOut = open(self.__CSVFile, 'w', newline='')
             self.writer = csv.DictWriter(self.csvOut, self.fieldNames)
@@ -159,11 +159,9 @@ class UserManager(object):
             self.ZhUsers.append(row)
             self.userZhName.append(row['ZhName'])
             self.userEngName.append(row['EngName'])
-        print(self.ZhUsers)
         self.zhCsvIn.close()
 
     def writeZhCSV(self, data):
-        print(data)
         if type(data) is list:
             self.csvOut = open(self.__ZhCsvFile, 'w', newline='')
             self.writer = csv.DictWriter(self.csvOut, self.ZhFieldNames)
@@ -200,16 +198,26 @@ class UserManager(object):
         else:
             return False
 
-    def getAllZhUserZhName(self):
+    def getAllZhUser(self):
+        self.readZhCSV()
+        return self.ZhUsers
+
+    def getAllZhUserZhName(self):  #获取所有中文名
         self.readZhCSV()
         return self.userZhName
 
-    def getAllZhUserEngName(self):
+    def getAllZhUserEngName(self): #获取所有英文名
         self.readZhCSV()
         return self.userEngName
 
-    def getZhNamebyEngName(self,EngName):
+    def getZhNamebyEngName(self,EngName):  #通过英文名获取中文名
         self.readZhCSV()
         for ZhUser in self.ZhUsers:
             if ZhUser['EngName'] == EngName:
                 return ZhUser['ZhName']
+
+    def getEngNamebyZhName(self, ZhName):  # 通过中文名获取英文
+        self.readZhCSV()
+        for ZhUser in self.ZhUsers:
+            if ZhUser['ZhName'] == ZhName:
+                return ZhUser['EngName']
