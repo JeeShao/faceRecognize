@@ -183,7 +183,7 @@ class FaceRegister(QWidget):
             self.startRec()
 
     def reciveUserName(self, name):
-        self.personName = str(name)
+        self.personName = str(name.strip())
         if self.Chinese(self.personName):
             self.personName = self.manager.addZhUser(self.personName)
             if not self.personName:
@@ -433,12 +433,12 @@ class DelFace(QWidget):
         self.label_info.setFont(font)
 
         self.scrollArea = QtGui.QScrollArea(DelFace)
-        self.scrollArea.setGeometry(QtCore.QRect(135, 80, 530, 400))  # 图片窗口
+        self.scrollArea.setGeometry(QtCore.QRect(150, 80, 500, 400))  # 图片窗口
         self.scrollArea.setWidgetResizable(False)
         self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
-        self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 600, 548))
+        # self.scrollAreaWidgetContents = QtGui.QWidget()
+        # self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 600, 548))
 
         self.gridLayoutWidget = QtGui.QWidget(self.scrollArea)
 
@@ -481,10 +481,19 @@ class DelFace(QWidget):
         for i in range(0, len(self.faceNames)):
             if self.faceNames[i] in self.zhUserName:
                 self.faceNames[i] = self.manager.getZhNamebyEngName(self.faceNames[i])
+            font = QtGui.QFont()
+            font.setPointSize(16)
+
+            pe = QPalette()  # 设置提示信息颜色
+            pe.setColor(QPalette.WindowText, Qt.blue)
             self.checkbox = QCheckBox(self.faceNames[i],self)
             self.checkbox.setFocusPolicy(QtCore.Qt.NoFocus)
+            self.checkbox.setFont(font)
+            self.checkbox.setPalette(pe)
+            # self.checkbox.setObjectName("box_%d"%i)
+            self.checkbox.setFixedSize(165,30)
             # checkbox.toggle() #默认选中
-            # self.connect(self.checkbox, QtCore.SIGNAL('stateChanged(int)'), self.checkUser)
+            # self.connect(self.checkbox, QtCore.SIGNAL('stateChanged(int)'), self.changeColor("box_%d"%i))
             self.gridLayout.addWidget(self.checkbox, i / 3, i % 3, 1, 1)
             self.gridLayoutWidget.setFixedSize(self.gridLayout.sizeHint())
 

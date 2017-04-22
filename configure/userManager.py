@@ -109,7 +109,7 @@ class UserManager(object):
         self.userNames = []
         for row in self.reader:
             self.users.append(row)
-            self.userIds.append(row['id'])
+            self.userIds.append(int(row['id']))
             self.userNames.append(row['userName'])
         self.csvIn.close()
 
@@ -171,15 +171,15 @@ class UserManager(object):
         else:
             userEngNames = self.getAllZhUserEngName()
             if userEngNames == []:
-                newId = 1
+                newId = "%02d"%1
             else:
-                userEngNames.sort()
-                newId = int(userEngNames[len(userEngNames)-1].split('_')[1]) + 1
-            newZhUser = {'ZhName': name, 'EngName': str('zh_%d'%newId)}
+                userEngNames.sort(key=lambda x:int(x.split('_')[1]))
+                newId = "%02d"%(int(userEngNames[len(userEngNames)-1].split('_')[1])+1)
+            newZhUser = {'ZhName': name, 'EngName': str('zh_%s'%newId)}
             self.ZhUsers.append(newZhUser)
 
             self.writeZhCSV(newZhUser)
-            return str('zh_%d'%newId)
+            return str('zh_%s'%newId)
 
     def hasZhUser(self, user):
         zhUserNames = self.getAllZhUserZhName()

@@ -22,3 +22,5 @@ QDialog {
   min-width: 150px;
   min-height: 50px;
 }
+
+/*QLCDNumber{color: red}*/
