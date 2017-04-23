@@ -18,7 +18,7 @@ def main():
     video = Video.Video(0)
     video.release()
     video.setFrameSize(640, 480)
-    video.setFPS(30)
+    video.setFPS(50)
 
     QtApp = QApplication(sys.argv)
     
