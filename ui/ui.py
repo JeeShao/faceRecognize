@@ -29,7 +29,7 @@ except AttributeError:
         return QtGui.QApplication.translate(context, text, disambig)
 
 #Qt css样式文件
-style = open('./ui/css/style.css').read()
+# style = open('./ui/css/style.css').read()
 
 #显示视频的Qt控件
 #setRect当前一帧图像上画出方框，用于标记人脸的位置
@@ -553,7 +553,7 @@ class DelFace(QWidget):
 
     def retranslateUi(self, DelFace):
         DelFace.setWindowTitle(_translate("DelFace", "Form", None))
-        self.label_info.setText(_translate("DelFace", "勾选预删除的人脸名，点击删除按钮进行删除", None))
+        self.label_info.setText(_translate("DelFace", "删除人脸", None))
         self.pushButton_back.setText(_translate("DelFace", "返回", None))
         self.pushButton_delete.setText(_translate("DelFace", "删除", None))
 
@@ -642,7 +642,7 @@ class PictureSelect(QWidget):
         pictureSelect.setObjectName(_fromUtf8("pictureSelect"))
         # pictureSelect.resize(800, 640)
         
-        self.setStyleSheet(style)
+        # self.setStyleSheet(style)
         
         font = QtGui.QFont()
         font.setPointSize(18)

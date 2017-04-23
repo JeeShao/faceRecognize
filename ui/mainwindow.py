@@ -23,7 +23,7 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-style = open('./ui/css/style.css').read()
+# style = open('./ui/css/style.css').read()
 
 class Ui_MainWindow(QMainWindow):
     model = None
