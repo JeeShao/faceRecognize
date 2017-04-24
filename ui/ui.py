@@ -403,10 +403,12 @@ class DelFace(QWidget):
 
     faceNames = []
     model = None
+    style = open('./ui/css/delface_style.css').read()
 
     def __init__(self,mainWindow):
         super(DelFace, self).__init__()
         self.mainWindow = mainWindow
+        self.setStyleSheet(self.style)
         self.manager = userManager.UserManager()
         self.data = self.manager.getAllUser() #csv文件数据
         self.zhData = self.manager.getAllZhUser() #中文用户csv数据
@@ -491,13 +493,14 @@ class DelFace(QWidget):
             self.checkbox.setFont(font)
             self.checkbox.setPalette(pe)
             # self.checkbox.setObjectName("box_%d"%i)
-            self.checkbox.setFixedSize(165,30)
+            self.checkbox.setFixedSize(150,30)
             # checkbox.toggle() #默认选中
             # self.connect(self.checkbox, QtCore.SIGNAL('stateChanged(int)'), self.changeColor("box_%d"%i))
             self.gridLayout.addWidget(self.checkbox, i / 3, i % 3, 1, 1)
             self.gridLayoutWidget.setFixedSize(self.gridLayout.sizeHint())
 
     def pushButton_delete_clicked(self):
+        flag = 0
         self.pushButton_delete.setEnabled(False)
         for i in range(self.gridLayout.count()):
             item = self.gridLayout.itemAt(i)
@@ -505,12 +508,14 @@ class DelFace(QWidget):
                 checkbox = item.widget()
                 # print(label_pic.pictureName)
                 if checkbox.isChecked():
+                    flag = 1 #有选中项
                     self.delFaceData(checkbox.text())
         #删除完成 重写csv 重新训练模型 重新加载面板
-        self.delFinished("完成人脸删除")
-        self.clearGridLayout() #清空checkbox
-        self.readFaces()
-        self.showFaces()
+        if flag == 1: #有删除人脸
+            self.delFinished("完成人脸删除")
+            self.clearGridLayout() #清空checkbox
+            self.readFaces()
+            self.showFaces()
         self.pushButton_delete.setEnabled(True)
 
     #处理删除人脸文件和CSV数据
