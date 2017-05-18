@@ -3,9 +3,9 @@
 # #@Time  : 2017/3/22
 # #@Author: Jee
 '''
-Created on 2016年5月7日
+Created on 2017年5月7日
 
-@author: imhey_000
+@author: Jee
 '''
 
 from . import config
