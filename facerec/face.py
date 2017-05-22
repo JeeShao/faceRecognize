@@ -3,7 +3,6 @@ import cv2
 from configure import config
 
 haar_faces = cv2.CascadeClassifier(config.CLASSIFIER_FILE)
-
 def detectSingleFace(image):
     """ 返回脸部区域的边界(x, y, width, height)
         如果没有检测到人脸则返回None

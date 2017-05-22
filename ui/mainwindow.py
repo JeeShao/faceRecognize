@@ -32,8 +32,10 @@ class Ui_MainWindow(QMainWindow):
         
         self.setupUi(self)
         # self.setStyleSheet(style)
-        
+
     def setupUi(self, MainWindow):
+
+
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(800, 640)
         # 禁止最大化按钮
